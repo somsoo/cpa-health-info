@@ -1,0 +1,8 @@
+﻿title: "건강 & 메디컬 매거진"
+description: "남성 건강, 비뇨기과, 의료 정보 및 건강 관리 꿀팁을 전해드립니다."
+url: "https://health.enjoy-onepage.com"
+theme: minima
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
