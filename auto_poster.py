@@ -60,48 +60,48 @@ except Exception as e:
 
 
 # =================================================================
-# 1. 由ъ뼹 ?곗씠??湲곕컲 SEO (?ㅼ씠踰??먮룞?꾩꽦/?곌?寃?됱뼱 ?ㅼ떆媛?異붿텧)
+# 1. 리얼 데이터 기반 SEO (네이버 자동완성/연관검색어 실시간 추출)
 # =================================================================
 main_keyword = campaign.get('keywords', [campaign['name']])[0]
 real_keywords = [main_keyword]
 try:
-    # ?ㅼ씠踰?紐⑤컮???먮룞?꾩꽦 API (?몄쬆 遺덊븘?? 媛???ㅼ떆媛??몃젋?쒕? 諛섏쁺?섎뒗 濡깊뀒???ㅼ썙??
+    # 네이버 모바일 자동완성 API (인증 불필요, 가장 실시간 트렌드를 반영하는 롱테일 키워드)
     url = f"https://mac.search.naver.com/mobile/ac?q={main_keyword}&st=1&r_format=json&q_enc=UTF-8"
     res = requests.get(url, timeout=5)
     data = res.json()
     if 'items' in data and len(data['items']) > 0 and len(data['items'][0]) > 0:
-        real_keywords = [item[0] for item in data['items'][0][:4]]  # ?곸쐞 4媛?異붿텧
+        real_keywords = [item[0] for item in data['items'][0][:4]]  # 상위 4개 추출
 except Exception as e:
     print("Trend API fetch failed, using fallback:", e)
 
 keyword_str = ", ".join(real_keywords)
-print(f"?뵦 Extracted Real Trend Keywords: {keyword_str}")
+print(f"🔥 Extracted Real Trend Keywords: {keyword_str}")
 
 # =================================================================
-# 2. 蹂몃Ц ?묒꽦 (2-Pass 濡쒖쭅)
+# 2. 본문 작성 (2-Pass 로직)
 # =================================================================
 prompt = f"""
-?뱀떊? 理쒓퀬???쒗쑕留덉???CPA) 移댄뵾?쇱씠?곗엯?덈떎.
-?ㅼ쓬 罹좏럹???뺣낫瑜?諛뷀깢?쇰줈 釉붾줈洹??ъ뒪??'蹂몃Ц'留??묒꽦?섏꽭?? 
-?덈? YAML Frontmatter(--- layout: post ... ---)瑜??묒꽦?섏? 留덉꽭?? ?ㅼ쭅 留덊겕?ㅼ슫 蹂몃Ц ?띿뒪?몃쭔 異쒕젰?섏꽭??
+당신은 최고의 제휴마케팅(CPA) 카피라이터입니다.
+다음 캠페인 정보를 바탕으로 블로그 포스팅 '본문'만 작성하세요. 
+절대 YAML Frontmatter(--- layout: post ... ---)를 작성하지 마세요. 오직 마크다운 본문 텍스트만 출력하세요.
 
-[罹좏럹???뺣낫]
-- ?대쫫: {campaign['name']}
-- ?쒗깮: {campaign['benefits']}
-- ?寃?諛?洹쒖튃: {campaign['rules']}
-- 留곹겕: {campaign['link']}
-- ?寃?濡깊뀒???ㅼ썙?? {keyword_str}
+[캠페인 정보]
+- 이름: {campaign['name']}
+- 혜택: {campaign['benefits']}
+- 타겟 및 규칙: {campaign['rules']}
+- 링크: {campaign['link']}
+- 타겟 롱테일 키워드: {keyword_str}
 
-[2-Pass ?묒꽦 濡쒖쭅]
-1. (Pass 1) 李쎌쓽?곸씤 ?ㅽ넗由ы뀛留?珥덉븞???묒꽦?⑸땲?? ?寃잛쓽 怨좎땐???먭레?섍퀬 ?쒗깮??媛뺤“?섏꽭??
-2. (Pass 2) 珥덉븞??寃?좏븯硫?湲덉??대굹 洹쒖튃 ?꾨컲???녿뒗吏 ?뺤씤?섍퀬, 理쒖쥌?곸쑝濡?媛???먯뿰?ㅻ읇怨??ㅻ뱷???덈뒗 ?꾨꼍??蹂몃Ц???앹꽦?섏꽭??
+[2-Pass 작성 로직]
+1. (Pass 1) 창의적인 스토리텔링 초안을 작성합니다. 타겟의 고충을 자극하고 혜택을 강조하세요.
+2. (Pass 2) 초안을 검토하며 금지어나 규칙 위반이 없는지 확인하고, 최종적으로 가장 자연스럽고 설득력 있는 완벽한 본문을 생성하세요.
 
-[?꾩닔 援ъ“]
-1. 湲 以묎컙以묎컙???먯뿰?ㅻ읇寃?踰꾪듉 ?뺥깭??CPA 留곹겕瑜?2???댁긽 ?쎌엯?섏꽭??
-(踰꾪듉 HTML ?덉떆: <div style="text-align: center; margin: 20px 0;"><a href="{campaign['link']}" style="background-color: #ff5722; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;" target="_blank">?몛 臾대즺 ?곷떞 ?좎껌?섍린</a></div>)
-2. 湲???댁슜怨??댁슱由щ뒗 怨좏솕吏??몄뒪?뚮옒???대?吏 URL(https://source.unsplash.com/800x600/?{main_keyword})??留덊겕?ㅼ슫 ?뺥깭濡?2???댁긽 ?쎌엯?섏꽭??
+[필수 구조]
+1. 글 중간중간에 자연스럽게 버튼 형태의 CPA 링크를 2회 이상 삽입하세요.
+(버튼 HTML 예시: <div style="text-align: center; margin: 20px 0;"><a href="{campaign['link']}" style="background-color: #ff5722; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;" target="_blank">👉 무료 상담 신청하기</a></div>)
+2. 글의 내용과 어울리는 고화질 언스플래쉬 이미지 URL(https://source.unsplash.com/800x600/?{main_keyword})을 마크다운 형태로 2장 이상 삽입하세요.
 
-異쒕젰? 2-Pass瑜?嫄곗튇 理쒖쥌 '蹂몃Ц ?댁슜'留??댁＜?몄슂.
+출력은 2-Pass를 거친 최종 '본문 내용'만 해주세요.
 """
 
 max_retries = 3
@@ -117,15 +117,15 @@ for attempt in range(max_retries):
         break
     else:
         error_msgs = []
-        if not has_button: error_msgs.append("?섏씡??踰꾪듉(a ?쒓렇) ?꾨씫")
-        if not has_image: error_msgs.append("?대?吏(unsplash ?? ?꾨씫")
-        prompt += f"\n\n[?쒖뒪??寃쎄퀬] {', '.join(error_msgs)} ?섏뿀?듬땲?? 諛섎뱶??踰꾪듉怨??대?吏瑜??ы븿???ㅼ떆 ?묒꽦?섏꽭??"
+        if not has_button: error_msgs.append("수익화 버튼(a 태그) 누락")
+        if not has_image: error_msgs.append("이미지(unsplash 등) 누락")
+        prompt += f"\n\n[시스템 경고] {', '.join(error_msgs)} 되었습니다. 반드시 버튼과 이미지를 포함해 다시 작성하세요."
 
 
-# AI ?ㅻ쪟 諛⑹뼱 (Frontmatter ?쒓굅)
+# AI 오류 방어 (Frontmatter 제거)
 import re
 body_content = re.sub(r'^---.*?---\s*', '', body_content, flags=re.DOTALL)
-body_content = re.sub(r'??s*layout:.*???s*', '', body_content, flags=re.DOTALL)
+body_content = re.sub(r'—\s*layout:.*?—\s*', '', body_content, flags=re.DOTALL)
 
 kst = pytz.timezone('Asia/Seoul')
 now = datetime.now(kst)
@@ -134,18 +134,18 @@ file_date_str = now.strftime('%Y-%m-%d')
 file_time_str = now.strftime('%H-%M-%S')
 
 # =================================================================
-# 3. 由ъ뼹 ?곗씠??湲곕컲 SEO ?쒕ぉ ?앹꽦
+# 3. 리얼 데이터 기반 SEO 제목 생성
 # =================================================================
-title_prompt = f"""??湲? 援ш?/?ㅼ씠踰?寃???좎엯(SEO)??洹밸??뷀빐???⑸땲?? 
-諛⑷툑 ?ы꽭 寃???몃젋???먮룞?꾩꽦)?먯꽌 異붿텧???ㅼ젣 濡깊뀒???ㅼ썙?쒕뒗 ?ㅼ쓬怨?媛숈뒿?덈떎: [{keyword_str}]
+title_prompt = f"""이 글은 구글/네이버 검색 유입(SEO)을 극대화해야 합니다. 
+방금 포털 검색 트렌드(자동완성)에서 추출한 실제 롱테일 키워드는 다음과 같습니다: [{keyword_str}]
 
-???ㅼ젣 ?ㅼ썙?쒕뱾 以?1~2媛쒕? 諛섎뱶???쒕ぉ ?욌?遺꾩뿉 ?먯뿰?ㅻ읇寃?諛곗튂?섏뿬, ?寃?怨좉컼??怨좎땐???닿껐?댁＜??轅???뺣낫湲 ?먮굦?쇰줈 40~60??湲몄씠???쒕ぉ???묒꽦?섏꽭??
-(?⑥닚 愿묎퀬泥섎읆 蹂댁씠吏 ?딄쾶, ?뱀닔臾몄옄 ?쒖쇅, 蹂몃Ц ?놁씠 ?쒕ぉ留?異쒕젰)"""
+이 실제 키워드들 중 1~2개를 반드시 제목 앞부분에 자연스럽게 배치하여, 타겟 고객의 고충을 해결해주는 꿀팁 정보글 느낌으로 40~60자 길이의 제목을 작성하세요.
+(단순 광고처럼 보이지 않게, 특수문자 제외, 본문 없이 제목만 출력)"""
 
 title_response = model.generate_content(title_prompt)
 title = title_response.text.strip().replace('"', '').replace("'", "")
 
-category = "?뺣낫"
+category = "정보"
 if campaign.get('keywords'):
     category = campaign['keywords'][0]
 
@@ -165,19 +165,18 @@ with open(filename, 'w', encoding='utf-8') as f:
     f.write(final_post)
 
 # -------------------------------------------------------------
-# 4. POST_LOG.md (諛쒗뻾 ??? 湲곕줉
+# 4. POST_LOG.md (발행 대장) 기록
 # -------------------------------------------------------------
 try:
     log_file = "POST_LOG.md"
-    platform = campaign.get('platform', '湲고?')
-    camp_name = campaign.get('name', '?대쫫?놁쓬')
-    log_entry = f"- `{file_date_str}` | [{platform}] {camp_name} | {title}"
-"
+    platform = campaign.get('platform', '기타')
+    camp_name = campaign.get('name', '이름없음')
+    log_entry = f"- `{file_date_str}` | [{platform}] {camp_name} | {title}\n"
     
-    # ?뚯씪???놁쑝硫??ㅻ뜑 ?ш퀬 ?앹꽦
+    # 파일이 없으면 헤더 달고 생성
     if not os.path.exists(log_file):
         with open(log_file, 'w', encoding='utf-8') as lf:
-            lf.write("# ?뱷 ?먮룞 ?ъ뒪??諛쒗뻾 ???
+            lf.write("# 📝 자동 포스팅 발행 대장
 
 ")
             
@@ -186,4 +185,4 @@ try:
 except Exception as e:
     print("Log write failed:", e)
 
-print(f"??Generated {filename}")
+print(f"✅ Generated {filename}")
