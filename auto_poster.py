@@ -60,48 +60,48 @@ except Exception as e:
 
 
 # =================================================================
-# 1. 리얼 데이터 기반 SEO (네이버 자동완성/연관검색어 실시간 추출)
+# 1. 리얼 ?�이??기반 SEO (?�이�??�동?�성/?��?검?�어 ?�시�?추출)
 # =================================================================
 main_keyword = campaign.get('keywords', [campaign['name']])[0]
 real_keywords = [main_keyword]
 try:
-    # 네이버 모바일 자동완성 API (인증 불필요, 가장 실시간 트렌드를 반영하는 롱테일 키워드)
+    # ?�이�?모바???�동?�성 API (?�증 불필?? 가???�시�??�렌?��? 반영?�는 롱테???�워??
     url = f"https://mac.search.naver.com/mobile/ac?q={main_keyword}&st=1&r_format=json&q_enc=UTF-8"
     res = requests.get(url, timeout=5)
     data = res.json()
     if 'items' in data and len(data['items']) > 0 and len(data['items'][0]) > 0:
-        real_keywords = [item[0] for item in data['items'][0][:4]]  # 상위 4개 추출
+        real_keywords = [item[0] for item in data['items'][0][:4]]  # ?�위 4�?추출
 except Exception as e:
     print("Trend API fetch failed, using fallback:", e)
 
 keyword_str = ", ".join(real_keywords)
-print(f"🔥 Extracted Real Trend Keywords: {keyword_str}")
+print(f"?�� Extracted Real Trend Keywords: {keyword_str}")
 
 # =================================================================
-# 2. 본문 작성 (2-Pass 로직)
+# 2. 본문 ?�성 (2-Pass 로직)
 # =================================================================
 prompt = f"""
-당신은 최고의 제휴마케팅(CPA) 카피라이터입니다.
-다음 캠페인 정보를 바탕으로 블로그 포스팅 '본문'만 작성하세요. 
-절대 YAML Frontmatter(--- layout: post ... ---)를 작성하지 마세요. 오직 마크다운 본문 텍스트만 출력하세요.
+?�신?� 최고???�휴마�???CPA) 카피?�이?�입?�다.
+?�음 캠페???�보�?바탕?�로 블로�??�스??'본문'�??�성?�세?? 
+?��? YAML Frontmatter(--- layout: post ... ---)�??�성?��? 마세?? ?�직 마크?�운 본문 ?�스?�만 출력?�세??
 
-[캠페인 정보]
-- 이름: {campaign['name']}
-- 혜택: {campaign['benefits']}
-- 타겟 및 규칙: {campaign['rules']}
+[캠페???�보]
+- ?�름: {campaign['name']}
+- ?�택: {campaign['benefits']}
+- ?��?�?규칙: {campaign['rules']}
 - 링크: {campaign['link']}
-- 타겟 롱테일 키워드: {keyword_str}
+- ?��?롱테???�워?? {keyword_str}
 
-[2-Pass 작성 로직]
-1. (Pass 1) 창의적인 스토리텔링 초안을 작성합니다. 타겟의 고충을 자극하고 혜택을 강조하세요.
-2. (Pass 2) 초안을 검토하며 금지어나 규칙 위반이 없는지 확인하고, 최종적으로 가장 자연스럽고 설득력 있는 완벽한 본문을 생성하세요.
+[2-Pass ?�성 로직]
+1. (Pass 1) 창의?�인 ?�토리텔�?초안???�성?�니?? ?�겟의 고충???�극?�고 ?�택??강조?�세??
+2. (Pass 2) 초안??검?�하�?금�??�나 규칙 ?�반???�는지 ?�인?�고, 최종?�으�?가???�연?�럽�??�득???�는 ?�벽??본문???�성?�세??
 
-[필수 구조]
-1. 글 중간중간에 자연스럽게 버튼 형태의 CPA 링크를 2회 이상 삽입하세요.
-(버튼 HTML 예시: <div style="text-align: center; margin: 20px 0;"><a href="{campaign['link']}" style="background-color: #ff5722; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;" target="_blank">👉 무료 상담 신청하기</a></div>)
-2. 글의 내용과 어울리는 고화질 언스플래쉬 이미지 URL(https://source.unsplash.com/800x600/?{main_keyword})을 마크다운 형태로 2장 이상 삽입하세요.
+[?�수 구조]
+1. 글 중간중간???�연?�럽�?버튼 ?�태??CPA 링크�?2???�상 ?�입?�세??
+(버튼 HTML ?�시: <div style="text-align: center; margin: 20px 0;"><a href="{campaign['link']}" style="background-color: #ff5722; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;" target="_blank">?�� 무료 ?�담 ?�청?�기</a></div>)
+2. 글???�용�??�울리는 고화�??�스?�래???��?지 URL(https://source.unsplash.com/800x600/?{main_keyword})??마크?�운 ?�태�?2???�상 ?�입?�세??
 
-출력은 2-Pass를 거친 최종 '본문 내용'만 해주세요.
+출력?� 2-Pass�?거친 최종 '본문 ?�용'�??�주?�요.
 """
 
 max_retries = 3
@@ -117,15 +117,15 @@ for attempt in range(max_retries):
         break
     else:
         error_msgs = []
-        if not has_button: error_msgs.append("수익화 버튼(a 태그) 누락")
-        if not has_image: error_msgs.append("이미지(unsplash 등) 누락")
-        prompt += f"\n\n[시스템 경고] {', '.join(error_msgs)} 되었습니다. 반드시 버튼과 이미지를 포함해 다시 작성하세요."
+        if not has_button: error_msgs.append("?�익??버튼(a ?�그) ?�락")
+        if not has_image: error_msgs.append("?��?지(unsplash ?? ?�락")
+        prompt += f"\n\n[?�스??경고] {', '.join(error_msgs)} ?�었?�니?? 반드??버튼�??��?지�??�함???�시 ?�성?�세??"
 
 
-# AI 오류 방어 (Frontmatter 제거)
+# AI ?�류 방어 (Frontmatter ?�거)
 import re
 body_content = re.sub(r'^---.*?---\s*', '', body_content, flags=re.DOTALL)
-body_content = re.sub(r'—\s*layout:.*?—\s*', '', body_content, flags=re.DOTALL)
+body_content = re.sub(r'??s*layout:.*???s*', '', body_content, flags=re.DOTALL)
 
 kst = pytz.timezone('Asia/Seoul')
 now = datetime.now(kst)
@@ -134,18 +134,18 @@ file_date_str = now.strftime('%Y-%m-%d')
 file_time_str = now.strftime('%H-%M-%S')
 
 # =================================================================
-# 3. 리얼 데이터 기반 SEO 제목 생성
+# 3. 리얼 ?�이??기반 SEO ?�목 ?�성
 # =================================================================
-title_prompt = f"""이 글은 구글/네이버 검색 유입(SEO)을 극대화해야 합니다. 
-방금 포털 검색 트렌드(자동완성)에서 추출한 실제 롱테일 키워드는 다음과 같습니다: [{keyword_str}]
+title_prompt = f"""??글?� 구�?/?�이�?검???�입(SEO)??극�??�해???�니?? 
+방금 ?�털 검???�렌???�동?�성)?�서 추출???�제 롱테???�워?�는 ?�음�?같습?�다: [{keyword_str}]
 
-이 실제 키워드들 중 1~2개를 반드시 제목 앞부분에 자연스럽게 배치하여, 타겟 고객의 고충을 해결해주는 꿀팁 정보글 느낌으로 40~60자 길이의 제목을 작성하세요.
-(단순 광고처럼 보이지 않게, 특수문자 제외, 본문 없이 제목만 출력)"""
+???�제 ?�워?�들 �?1~2개�? 반드???�목 ?��?분에 ?�연?�럽�?배치?�여, ?��?고객??고충???�결?�주??꿀???�보글 ?�낌?�로 40~60??길이???�목???�성?�세??
+(?�순 광고처럼 보이지 ?�게, ?�수문자 ?�외, 본문 ?�이 ?�목�?출력)"""
 
 title_response = model.generate_content(title_prompt)
 title = title_response.text.strip().replace('"', '').replace("'", "")
 
-category = "정보"
+category = "?�보"
 if campaign.get('keywords'):
     category = campaign['keywords'][0]
 
@@ -165,19 +165,19 @@ with open(filename, 'w', encoding='utf-8') as f:
     f.write(final_post)
 
 # -------------------------------------------------------------
-# 4. POST_LOG.md (발행 대장) 기록
+# 4. POST_LOG.md (발행 ?�?? 기록
 # -------------------------------------------------------------
 try:
     log_file = "POST_LOG.md"
-    platform = campaign.get('platform', '기타')
-    camp_name = campaign.get('name', '이름없음')
-    log_entry = f"- `{file_date_str}` | [{platform}] {camp_name} | {title}
+    platform = campaign.get('platform', '기�?')
+    camp_name = campaign.get('name', '?�름?�음')
+    log_entry = f"- `{file_date_str}` | [{platform}] {camp_name} | {title}"
 "
     
-    # 파일이 없으면 헤더 달고 생성
+    # ?�일???�으�??�더 ?�고 ?�성
     if not os.path.exists(log_file):
         with open(log_file, 'w', encoding='utf-8') as lf:
-            lf.write("# 📝 자동 포스팅 발행 대장
+            lf.write("# ?�� ?�동 ?�스??발행 ?�??
 
 ")
             
@@ -186,4 +186,4 @@ try:
 except Exception as e:
     print("Log write failed:", e)
 
-print(f"✅ Generated {filename}")
+print(f"??Generated {filename}")
